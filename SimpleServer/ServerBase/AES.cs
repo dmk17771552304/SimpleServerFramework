@@ -141,19 +141,19 @@ public class AES
     {
         if (EncryptByte.Length == 0) { throw (new Exception("明文不得为空")); }
         if (string.IsNullOrEmpty(EncryptKey)) { throw (new Exception("密钥不得为空")); }
-        byte[] m_strEncrypt;
-        byte[] m_btIV = Convert.FromBase64String("Rkb4jvUy/ye7Cd7k89QQgQ==");
-        byte[] m_salt = Convert.FromBase64String("gsf4jvkyhye5/d7k8OrLgM==");
-        Rijndael m_AESProvider = Rijndael.Create();
+        byte[] strEncrypt;
+        byte[] btIV = Convert.FromBase64String("Rkb4jvUy/ye7Cd7k89QQgQ==");
+        byte[] salt = Convert.FromBase64String("gsf4jvkyhye5/d7k8OrLgM==");
+        Rijndael aESProvider = Rijndael.Create();
         try
         {
             MemoryStream m_stream = new MemoryStream();
-            PasswordDeriveBytes pdb = new PasswordDeriveBytes(EncryptKey, m_salt);
-            ICryptoTransform transform = m_AESProvider.CreateEncryptor(pdb.GetBytes(32), m_btIV);
+            PasswordDeriveBytes pdb = new PasswordDeriveBytes(EncryptKey, salt);
+            ICryptoTransform transform = aESProvider.CreateEncryptor(pdb.GetBytes(32), btIV);
             CryptoStream m_csstream = new CryptoStream(m_stream, transform, CryptoStreamMode.Write);
             m_csstream.Write(EncryptByte, 0, EncryptByte.Length);
             m_csstream.FlushFinalBlock();
-            m_strEncrypt = m_stream.ToArray();
+            strEncrypt = m_stream.ToArray();
             m_stream.Close(); m_stream.Dispose();
             m_csstream.Close(); m_csstream.Dispose();
         }
@@ -161,8 +161,8 @@ public class AES
         catch (CryptographicException ex) { throw ex; }
         catch (ArgumentException ex) { throw ex; }
         catch (Exception ex) { throw ex; }
-        finally { m_AESProvider.Clear(); }
-        return m_strEncrypt;
+        finally { aESProvider.Clear(); }
+        return strEncrypt;
     }
 
 
@@ -185,19 +185,19 @@ public class AES
     {
         if (DecryptByte.Length == 0) { throw (new Exception("密文不得为空")); }
         if (string.IsNullOrEmpty(DecryptKey)) { throw (new Exception("密钥不得为空")); }
-        byte[] m_strDecrypt;
-        byte[] m_btIV = Convert.FromBase64String("Rkb4jvUy/ye7Cd7k89QQgQ==");
-        byte[] m_salt = Convert.FromBase64String("gsf4jvkyhye5/d7k8OrLgM==");
-        Rijndael m_AESProvider = Rijndael.Create();
+        byte[] strDecrypt;
+        byte[] btIV = Convert.FromBase64String("Rkb4jvUy/ye7Cd7k89QQgQ==");
+        byte[] salt = Convert.FromBase64String("gsf4jvkyhye5/d7k8OrLgM==");
+        Rijndael aESProvider = Rijndael.Create();
         try
         {
             MemoryStream m_stream = new MemoryStream();
-            PasswordDeriveBytes pdb = new PasswordDeriveBytes(DecryptKey, m_salt);
-            ICryptoTransform transform = m_AESProvider.CreateDecryptor(pdb.GetBytes(32), m_btIV);
+            PasswordDeriveBytes pdb = new PasswordDeriveBytes(DecryptKey, salt);
+            ICryptoTransform transform = aESProvider.CreateDecryptor(pdb.GetBytes(32), btIV);
             CryptoStream m_csstream = new CryptoStream(m_stream, transform, CryptoStreamMode.Write);
             m_csstream.Write(DecryptByte, 0, DecryptByte.Length);
             m_csstream.FlushFinalBlock();
-            m_strDecrypt = m_stream.ToArray();
+            strDecrypt = m_stream.ToArray();
             m_stream.Close(); m_stream.Dispose();
             m_csstream.Close(); m_csstream.Dispose();
         }
@@ -205,8 +205,8 @@ public class AES
         catch (CryptographicException ex) { throw ex; }
         catch (ArgumentException ex) { throw ex; }
         catch (Exception ex) { throw ex; }
-        finally { m_AESProvider.Clear(); }
-        return m_strDecrypt;
+        finally { aESProvider.Clear(); }
+        return strDecrypt;
     }
 }
 

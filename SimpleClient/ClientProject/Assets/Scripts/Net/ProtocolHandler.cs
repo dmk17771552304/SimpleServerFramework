@@ -7,21 +7,21 @@ using UnityEngine;
 public class ProtocolHandler
 {
     private NetController _netController;
-    
+
     public ProtocolHandler(NetController netController)
     {
         _netController = netController;
     }
-    
-    public void SocketTest() 
+
+    public void SocketTest()
     {
         MessageTest msg = new MessageTest();
-        msg.ReqestContent = "Ocean";
+        msg.ReqestContent = "Dmk";
+        
+        _netController.RegisterProtoHandler(ProtocolEnum.MessageTest,
+            (message) => { Debug.Log("测试回调：" + ((MessageTest) message).ResponseContent); });
+        
         _netController.SendMessage(msg);
-        _netController.RegisterProtoHandler(ProtocolEnum.MessageTest, (message) =>
-        {
-            Debug.Log("测试回调：" + ((MessageTest)message).ResponseContent);
-        });
     }
 
     /// <summary>
@@ -32,19 +32,22 @@ public class ProtocolHandler
     /// <param name="password"></param>
     /// <param name="code"></param>
     /// <param name="callback"></param>
-    public void Register(RegisterType registerType, string userName, string password, string code, Action<RegisterResult> callback) 
+    public void Register(RegisterType registerType, string userName, string password, string code,
+        Action<RegisterResult> callback)
     {
         MessageRegister msg = new MessageRegister();
         msg.RegisterType = registerType;
         msg.Account = userName;
         msg.Password = password;
         msg.Code = code;
-        _netController.SendMessage(msg);
+        
         _netController.RegisterProtoHandler(ProtocolEnum.MessageRegister, (message) =>
         {
-            MessageRegister msgRegister = (MessageRegister)message;
+            MessageRegister msgRegister = (MessageRegister) message;
             callback(msgRegister.Result);
         });
+        
+        _netController.SendMessage(msg);
     }
 
     /// <summary>
@@ -54,17 +57,19 @@ public class ProtocolHandler
     /// <param name="userName"></param>
     /// <param name="password"></param>
     /// <param name="callback"></param>
-    public void Login(LoginType loginType,string userName,string password, Action<LoginResult,string> callback) 
+    public void Login(LoginType loginType, string userName, string password, Action<LoginResult, string> callback)
     {
         MessageLogin msg = new MessageLogin();
         msg.Account = userName;
         msg.Password = password;
         msg.LoginType = loginType;
-        _netController.SendMessage(msg);
-        _netController.RegisterProtoHandler(ProtocolEnum.MessageLogin,(message)=> 
+        
+        _netController.RegisterProtoHandler(ProtocolEnum.MessageLogin, (message) =>
         {
-            MessageLogin msgLogin = (MessageLogin)message;
+            MessageLogin msgLogin = (MessageLogin) message;
             callback(msgLogin.Result, msgLogin.Token);
         });
+        
+        _netController.SendMessage(msg);
     }
 }

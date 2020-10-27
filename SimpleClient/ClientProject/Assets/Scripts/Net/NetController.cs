@@ -56,6 +56,13 @@ public class NetController
 
     private NetworkReachability _curNetWork = NetworkReachability.NotReachable;
 
+    private MessageParser _messageParser;
+
+    public NetController(MessageParser messageParser)
+    {
+        _messageParser = messageParser;
+    }
+
     public IEnumerator CheckNet()
     {
         _curNetWork = Application.internetReachability;
@@ -195,7 +202,7 @@ public class NetController
                 break;
             }
 
-            if (msgBase is MessageSecret)
+            if (msgBase is MessagePing)
             {
                 _lastPongTime = GetTimeStamp();
                 Debug.Log("收到心跳包！！！！！！！");
@@ -320,8 +327,8 @@ public class NetController
         SendMessage(msg);
         RegisterProtoHandler(ProtocolEnum.MessageSecret, (message) =>
         {
-            SetKey(((MessageSecret) message).Srcret);
-            Debug.Log("获取密钥：" + ((MessageSecret) message).Srcret);
+            SetKey(((MessageSecret) message).Secret);
+            Debug.Log("获取密钥：" + ((MessageSecret) message).Secret);
         });
     }
 
@@ -377,7 +384,7 @@ public class NetController
 
         _readBuffer.ReadIndex += 4;
         int nameCount = 0;
-        ProtocolEnum protocol = MessageBase.DecodeName(_readBuffer.Bytes, _readBuffer.ReadIndex, out nameCount);
+        ProtocolEnum protocol = _messageParser.DecodeName(_readBuffer.Bytes, _readBuffer.ReadIndex, out nameCount);
         if (protocol == ProtocolEnum.None) 
         {
             Debug.LogError("OnReceiveData MsgBase.DecodeName fail");
@@ -390,7 +397,7 @@ public class NetController
         int bodyCount = bodyLength - nameCount;
         try
         {
-            MessageBase msgBase = MessageBase.DecodeContent(protocol, _readBuffer.Bytes, _readBuffer.ReadIndex, bodyCount);
+            MessageBase msgBase = _messageParser.DecodeContent(protocol, _readBuffer.Bytes, _readBuffer.ReadIndex, bodyCount);
             if (msgBase == null) 
             {
                 Debug.LogError("接受数据协议内容解析出错");
@@ -443,8 +450,8 @@ public class NetController
 
         try
         {
-            byte[] nameBytes = MessageBase.EncodeName(msgBase);
-            byte[] bodyBytes = MessageBase.EncodeContent(msgBase);
+            byte[] nameBytes = _messageParser.EncodeName(msgBase);
+            byte[] bodyBytes = _messageParser.EncodeContent(msgBase);
             int len = nameBytes.Length + bodyBytes.Length;
             byte[] byteHead = BitConverter.GetBytes(len);
             byte[] sendBytes = new byte[byteHead.Length + len];

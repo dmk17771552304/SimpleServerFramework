@@ -9,13 +9,9 @@ namespace SimpleServer.Net
         private UserController _useController;
         private ServerSocket _serverSocket;
 
-        public MessageHandler(UserController userController)
+        public MessageHandler(UserController userController, ServerSocket serverSocket)
         {
-            _useController = userController;     
-        }
-
-        public void InitServerSocket(ServerSocket serverSocket)
-        {
+            _useController = userController;
             _serverSocket = serverSocket;
         }
 

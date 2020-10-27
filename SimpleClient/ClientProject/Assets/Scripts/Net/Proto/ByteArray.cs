@@ -20,13 +20,13 @@ namespace SimpleServer.Net
 
         public byte[] Bytes { get { return _bytes; } }
 
-        public ByteArray(byte[] dafalutBytes) 
+        public ByteArray(byte[] defaultBytes) 
         {
-            _bytes = dafalutBytes;
-            _capacity = dafalutBytes.Length;
-            _initSize = dafalutBytes.Length;
+            _bytes = defaultBytes;
+            _capacity = defaultBytes.Length;
+            _initSize = defaultBytes.Length;
             ReadIndex = 0;
-            WriteIndex = dafalutBytes.Length;
+            WriteIndex = defaultBytes.Length;
         }
         
         public ByteArray()

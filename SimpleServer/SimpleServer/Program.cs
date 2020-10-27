@@ -32,12 +32,8 @@ namespace SimpleServer
             _useController = new UserController(_mySqlController);
 
             _messageParser = new MessageParser();
-
-            _messageHandler = new MessageHandler(_useController);
-
             _serverSocket = new ServerSocket(_messageParser);
-
-            _messageHandler.InitServerSocket(_serverSocket);
+            _messageHandler = new MessageHandler(_useController, _serverSocket);
 
             _messageParser.RegisterProtocol(ProtocolEnum.MessageSecret, typeof(MessageSecret));
             _messageParser.RegisterProtocol(ProtocolEnum.MessagePing, typeof(MessagePing));

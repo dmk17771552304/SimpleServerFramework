@@ -15,7 +15,7 @@ namespace SimpleServer.Proto
         public override ProtocolEnum ProtocolType { get; set; }
 
         [ProtoMember(2)]
-        public string Srcret;
+        public string Secret;
     }
 
     [ProtoContract]

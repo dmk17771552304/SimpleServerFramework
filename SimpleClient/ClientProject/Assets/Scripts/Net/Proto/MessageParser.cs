@@ -1,17 +1,23 @@
 ﻿using ProtoBuf;
 using SimpleServer.Const;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
 
 namespace SimpleServer.Proto
 {
-    public class MessageBase
+    public class MessageParser
     {
-        public virtual ProtocolEnum ProtocolType { get; set; }
+        private readonly Dictionary<ProtocolEnum, Type> _protocolTypeDict = new Dictionary<ProtocolEnum, Type>(); 
 
-        public static ProtocolEnum DecodeName(byte[] bytes, int offset, out int nameCount)
+        public void RegisterProtocol(ProtocolEnum protocol,Type t)
+        {
+            _protocolTypeDict[protocol] = t;
+        }
+
+        public ProtocolEnum DecodeName(byte[] bytes, int offset, out int nameCount)
         {
             nameCount = 0;
             if (offset + 2 > bytes.Length)
@@ -38,7 +44,7 @@ namespace SimpleServer.Proto
             }
         }
 
-        public static MessageBase DecodeContent(ProtocolEnum proto, byte[] bytes, int offset, int bodyCount)
+        public MessageBase DecodeContent(ProtocolEnum proto, byte[] bytes, int offset, int bodyCount)
         {
             if (bodyCount <= 0)
             {
@@ -56,32 +62,15 @@ namespace SimpleServer.Proto
                     secretKey = Consts.PublicKey;
                 }
                 newBytes = AES.AESDecrypt(newBytes, secretKey);
-                using (var memory = new MemoryStream(newBytes,0, newBytes.Length))
+                using (var memory = new MemoryStream(newBytes, 0, newBytes.Length))
                 {
-                    Type t = null;
-
-                    switch (proto)
+                    if (!_protocolTypeDict.ContainsKey(proto))
                     {
-                        case ProtocolEnum.None:
-                            break;
-                        case ProtocolEnum.MessageSecret:
-                            t = typeof(MessageSecret);
-                            break;
-                        case ProtocolEnum.MessagePing:
-                            t = typeof(MessagePing);
-                            break;
-                        case ProtocolEnum.MessageRegister:
-                            t = typeof(MessageRegister);
-                            break;
-                        case ProtocolEnum.MessageLogin:
-                            t = typeof(MessageLogin);
-                            break;
-                        case ProtocolEnum.MessageTest:
-                            t = typeof(MessageTest);
-                            break;
-                        default:
-                            break;
+                        Debug.LogError($"无该协议解析:{proto}");
+                        return null;
                     }
+                    Type t = _protocolTypeDict[proto];
+
                     return (MessageBase)Serializer.NonGeneric.Deserialize(t, memory);
                 }
             }
@@ -97,7 +86,7 @@ namespace SimpleServer.Proto
         /// </summary>
         /// <param name="msgBase"></param>
         /// <returns></returns>
-        public static byte[] EncodeName(MessageBase msgBase)
+        public byte[] EncodeName(MessageBase msgBase)
         {
             byte[] nameBytes = Encoding.UTF8.GetBytes(msgBase.ProtocolType.ToString());
             short len = (short)nameBytes.Length;
@@ -113,7 +102,7 @@ namespace SimpleServer.Proto
         /// </summary>
         /// <param name="msgBase"></param>
         /// <returns></returns>
-        public static byte[] EncodeContent(MessageBase msgBase)
+        public byte[] EncodeContent(MessageBase msgBase)
         {
             using (var memory = new MemoryStream())
             {
@@ -130,5 +119,10 @@ namespace SimpleServer.Proto
                 return bytes;
             }
         }
+    }
+
+    public class MessageBase
+    {
+        public virtual ProtocolEnum ProtocolType { get; set; }
     }
 }

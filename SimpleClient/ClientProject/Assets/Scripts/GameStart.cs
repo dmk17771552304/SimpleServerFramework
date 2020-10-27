@@ -1,20 +1,28 @@
 ﻿using SimpleServer.Business;
+using SimpleServer.Proto;
 using UnityEngine;
 
 public class GameStart : MonoBehaviour
 {
     private NetController _netController;
     private ProtocolHandler _protocolHandler;
+    private MessageParser _messageParser;
 
     void Start()
     {
-        _netController = new NetController();
+        _messageParser = new MessageParser();
+        _messageParser.RegisterProtocol(ProtocolEnum.MessageSecret, typeof(MessageSecret));
+        _messageParser.RegisterProtocol(ProtocolEnum.MessagePing, typeof(MessagePing));
+        _messageParser.RegisterProtocol(ProtocolEnum.MessageRegister, typeof(MessageRegister));
+        _messageParser.RegisterProtocol(ProtocolEnum.MessageLogin, typeof(MessageLogin));
+        _messageParser.RegisterProtocol(ProtocolEnum.MessageTest, typeof(MessageTest));
+        
+        _netController = new NetController(_messageParser);
         _protocolHandler = new ProtocolHandler(_netController);
         
         _netController.RegisterNetEventListener(NetEvent.ConnectSuccess, Debug.Log);
         _netController.RegisterNetEventListener(NetEvent.Close, Debug.Log);
         
-       
         _netController.Connect("127.0.0.1", 8011);
         StartCoroutine(_netController.CheckNet());
     }

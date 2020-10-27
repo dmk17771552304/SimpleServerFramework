@@ -2,9 +2,9 @@
 {
     public class Consts
     {
-        public static string PublicKey = "OceanSever";
+        public static string PublicKey = "DmkSeverPublicKey";
 
-        public static string SecretKey = "Ocean_Up&&NB!!";
+        public static string SecretKey = "DmkSeverSecretKey";
 
 #if DEBUG
         public static string IpStr = "127.0.0.1";
@@ -14,7 +14,7 @@
 #endif
         public static int Port = 8011;
 
-        public static long PingInterval = 30;
+        public static long PingInterval = 3;
 
         public static int Default_Byte_Size = 1024;
     }
